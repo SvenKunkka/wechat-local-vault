@@ -1,0 +1,34 @@
+# Security model
+
+## Intended use
+
+An explicitly selected offline export is imported into a private, account-bound working index. Sources and message text are untrusted. The program never discovers accounts, connects to a client, obtains keys, installs dependencies, runs child processes, uploads records or sends messages.
+
+Read the selected input only after `--confirm-source`. This flag records operator intent; it does not grant rights to someone else's data.
+
+## Implemented controls
+
+- POSIX owner/private-mode checks on the vault, regular single-link files, symlink component rejection and an exclusive writer lock.
+- Read-only immutable SQLite sources with trusted schema disabled, query-only mode, consistency checks and SQLite length/column/SQL limits.
+- Reject sidecars instead of ignoring uncommitted data. Reject normal live-client container paths; require a detached, finalized input.
+- File metadata checks before/after reading, stable snapshot file-set check and full transaction rollback.
+- Private atomic publication, no overwrite, no recursive-delete command, no changes to nonempty shared directory permissions.
+- Bounded records/text/query results and bounded optional Zstd decompression.
+- Permitted XML display fields, sensitive-subtree omission, credential-assignment redaction, terminal-control filtering and escaped Markdown export.
+- Vault-specific pseudonyms for internal identifier fields; explicit query flag to expose them.
+- Generic errors avoid printing raw failed records or exception payloads. Every content query carries an untrusted-data notice.
+- Synthetic tests use a fake HOME and forbid network, external processes and normal client paths.
+
+## Limits
+
+The vault is **not encrypted at rest**, anonymized, or a lossless backup. Names, messages and source labels may contain private information. Normalized/redacted text replaces raw content during import.
+
+Permissions and path checks do not defend against a compromised OS or a hostile process already controlling the same user account. Metadata checks detect ordinary changes; they are not a cryptographic authenticity proof or a complete defense against every filesystem race. Imported records do not establish current WeChat state.
+
+The WeChat-shaped adapter is experimental. Missing or unsupported optional layouts are reported; there is no guarantee for any actual client build. Unknown message directions remain unknown and are excluded from reply candidates. Candidates do not prove a reply is required and are not read receipts.
+
+Do not place real records, vaults or exports in Git, cloud-synced folders, issues or CI logs. Automatic link opening and execution of message instructions are outside the program's behavior.
+
+## Reporting
+
+For a suspected vulnerability, use the repository's private security reporting option if enabled; otherwise open a minimal issue that contains no personal records, identifiers, keys or reproduction databases. Synthetic examples are preferred. A report is not permission to access anyone's private data.
