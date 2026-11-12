@@ -14,3 +14,11 @@ build/
 *.sqlite-shm
 vault.json
 .env*
+
+# Native-decryption runtime material
+mirror.json
+**/generations/
+*key-map*.json
+*keymap*.json
+*keys*.json
+.capture-*/

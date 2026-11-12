@@ -31,6 +31,18 @@ def parser():
     p.add_argument("--source-label", required=True, help="Stable label for import history; avoid private absolute paths")
     p.add_argument("--confirm-source", action="store_true", help="Confirm authorization to read the selected input")
     p.add_argument("--self-id", default="", help="Optional explicit self identifier for snapshot direction matching")
+    for action in ("decrypt", "refresh"):
+        p = sub.add_parser(action, help="Explicit Mac decryption" if action == "decrypt" else "Decrypt and incrementally import")
+        p.add_argument("--source", required=True, type=Path)
+        p.add_argument("--key-file", required=True, type=Path)
+        p.add_argument("--output", required=True, type=Path, help="Dedicated private plaintext mirror")
+        p.add_argument("--account", required=True)
+        p.add_argument("--confirm-source", action="store_true")
+        p.add_argument("--allow-live-source", action="store_true", help="Separately authorize an explicitly named live client source")
+        p.add_argument("--mode", choices=("full", "incremental"), default="incremental")
+        if action == "refresh":
+            p.add_argument("--source-label", required=True)
+            p.add_argument("--self-id", default="")
     sub.add_parser("status", help="Integrity, record counts and import freshness")
     p = sub.add_parser("conversations")
     p.add_argument("--identifiers", action="store_true")
@@ -62,6 +74,29 @@ def parser():
 
 
 def execute(args):
+    if args.action in ("decrypt", "refresh"):
+        if not args.confirm_source:
+            raise VaultError("Input was not opened. Explicit --confirm-source is required.")
+        from .mirror import Mirror, overlap
+        if args.action == "refresh":
+            archive = Archive(args.vault if args.vault is not None else default_root())
+            if archive.metadata()["account"] != args.account:
+                raise VaultError("Account mismatch; encrypted source was not opened.")
+            if overlap(archive.root, locate(args.output)) or overlap(archive.root, locate(args.source)):
+                raise VaultError("Archive, encrypted source and plaintext mirror must be separate.")
+        mirror = Mirror(args.output)
+        decrypted = mirror.synchronize(source=args.source, keys=args.key_file, account=args.account,
+                     confirmed=True, mode=args.mode, allow_live=args.allow_live_source)
+        if args.action == "decrypt":
+            return decrypted
+        decrypted["stage"] = "decryption complete"
+        try:
+            notes = []
+            imported = archive.import_records(records(mirror.current(), "wechat4", notes, self_id=args.self_id),
+                       account=args.account, source_label=args.source_label, format_name="decrypted-wechat4", notes=notes)
+        except (VaultError, OSError, sqlite3.Error, ValueError):
+            raise VaultError("Decryption succeeded but archive import failed; the previous archive transaction is intact.") from None
+        return {"decryption": decrypted, "import": imported, "stage": "decryption and archive import complete"}
     archive = Archive(args.vault if args.vault is not None else default_root())
     if args.action == "init":
         return archive.initialize(args.account)

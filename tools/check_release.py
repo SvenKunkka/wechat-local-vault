@@ -39,6 +39,14 @@ def main():
             problems.append("Private/restricted artifact marker: " + name)
         if re.search(r"gh[pousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{30,}|AKIA[A-Z0-9]{16}", text):
             problems.append("Potential credential pattern: " + name)
+        if path.suffix == ".json":
+            try:
+                data = json.loads(text)
+            except ValueError:
+                problems.append("Invalid JSON release file: " + name)
+            else:
+                if isinstance(data, dict) and (("databases" in data and "profile" in data) or str(data.get("format", "")).startswith("wechat-local-vault-mirror/")):
+                    problems.append("Private decryption mapping/state included: " + name)
         if path.suffix == ".py":
             tree = ast.parse(text, filename=name)
             parsed += 1
