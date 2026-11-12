@@ -1,0 +1,6 @@
+{"category":"contact","id":"demo-person","name":"演示联系人 / Demo contact","text":"Synthetic contact"}
+{"id":"demo-001","conversation":"demo-chat","name":"演示群 / Demo group","sender":"demo-person","timestamp":"2026-01-01T09:00:00+08:00","kind":"text","text":"请确认样品时间。 / Please confirm the sample schedule.","direction":"in"}
+{"id":"demo-002","conversation":"demo-chat","name":"演示群 / Demo group","sender":"demo-self","timestamp":"2026-01-01T09:05:00+08:00","kind":"text","text":"周五确认。 / I will confirm on Friday.","direction":"out"}
+{"id":"demo-003","conversation":"demo-direct","name":"演示私聊 / Demo direct chat","sender":"demo-person","timestamp":"2026-01-02T10:00:00+08:00","kind":"text","text":"可以把包装尺寸发我吗？ / Could you share the package dimensions?","direction":"in"}
+{"category":"favorite","id":"demo-favorite","timestamp":"2026-01-02T11:00:00+08:00","text":"Synthetic saved note: packaging checklist"}
+{"category":"moment","id":"demo-moment","sender":"demo-person","timestamp":"2026-01-02T12:00:00+08:00","text":"Synthetic Moments text only; no media is downloaded."}

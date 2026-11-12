@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+.coverage
+.test-artifacts/
+.private/
+dist/
+build/
+*.egg-info/
+*.db
+*.sqlite
+*.db-wal
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+vault.json
+.env*
