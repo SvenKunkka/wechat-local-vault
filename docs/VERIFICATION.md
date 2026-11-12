@@ -1,4 +1,37 @@
-# Release verification — 0.1.0
+# Current release verification — 0.2.0
+
+Date: 2026-11-12. All inputs and keys were synthetic. No local installation, real client/database/key/config access, process injection or system-protection changes occurred.
+
+| Check | Result |
+|---|---|
+| macOS / Python 3.14.7 | 109 tests passed |
+| macOS / Python 3.12.14 and 3.13.15 | 107 passed per interpreter; 2 optional stdlib-Zstd tests skipped |
+| Separate-process Mac CLI smoke | 6 commands passed |
+| WAL-only update smoke | 1 database rebuilt, 1 reused, 1 new message inserted and read back |
+| Native AES | Public NIST AES-256-CBC encryption/decryption vector passed |
+| Transaction semantics | Valid SQLite overflow growth and VACUUM shrink passed; uncommitted frames excluded |
+| Test-strength experiment | Disabling all WAL commit markers in an isolated code copy caused 10 test failures |
+| Independent review | Cache copy race reproduced, fixed, regression-tested and re-reviewed without remaining blockers |
+| Publication-content check | Passed; runtime keys, mirror state, generations and databases excluded |
+
+The cache regression changes the old plaintext after hash validation but before copying. The copied bytes must match the previous authenticated hash; otherwise the database rebuilds from encrypted input. This prevented the reproduced unauthenticated edit from entering the next generation.
+
+The CLI smoke used two fictional encrypted databases and an explicit private fictional key map. It ran full decryption, unchanged incremental decryption, archive initialization, refresh, a WAL-only refresh and search readback. Source files were not modified by the application.
+
+GitHub CI covers macOS/Linux and Python 3.11/3.14. The actual workflow result, not its configuration, is the authority for remote success. Native AES runs only on Mac; Linux protocol tests inject a test-only identity cipher unavailable in production.
+
+Limits: no actual WeChat version or real account has been accepted. No installed SQLCipher runtime was used for cross-implementation acceptance. HMAC/page format and WAL rules follow public references, native AES has a public test vector, and generated inputs exercise the implementation; those checks do not replace real-client compatibility testing. Optional third-party zstandard remains unverified.
+
+Reproduce without installing:
+
+```sh
+python3 -W error::ResourceWarning -m unittest discover -s tests -v
+python3 tools/check_release.py
+```
+
+---
+
+# Historical 0.1.0 verification (superseded by the 0.2.0 record above)
 
 Date: 2026-11-12. All local fixtures were synthetic. No real client, account data, keys or dependencies were accessed/installed.
 

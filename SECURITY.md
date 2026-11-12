@@ -2,7 +2,7 @@
 
 ## Intended use
 
-An explicitly selected offline export is imported into a private, account-bound working index. Sources and message text are untrusted. The program never discovers accounts, connects to a client, obtains keys, installs dependencies, runs child processes, uploads records or sends messages.
+An explicitly selected offline export is imported into a private, account-bound working index. Sources and message text are untrusted. The program never discovers accounts, connects to/controls a client, obtains keys, installs dependencies, runs child processes, uploads records or sends messages. Version 0.2 adds explicitly selected encrypted-file reads with supplied keys; see docs/MAC_DECRYPTION.md.
 
 Read the selected input only after `--confirm-source`. This flag records operator intent; it does not grant rights to someone else's data.
 
@@ -19,9 +19,15 @@ Read the selected input only after `--confirm-source`. This flag records operato
 - Generic errors avoid printing raw failed records or exception payloads. Every content query carries an untrusted-data notice.
 - Synthetic tests use a fake HOME and forbid network, external processes and normal client paths.
 
+## Explicit native decryption
+
+Mac decryption uses system CommonCrypto, validates every selected page, verifies WAL checksums and commits, and checks SQLite integrity. A private key-map file is required; raw keys never enter arguments, logs or state. Inputs and key mappings are checked for concurrent changes. Generations publish atomically and failed batches preserve the current pointer. Normalized import is a separate transaction and can fail after successful decryption.
+
+Live-container paths require an additional flag and current explicit authorization. No actual client path was tested. Sources are never checkpointed or edited. Strict malformed-WAL rejection and a single supported profile can refuse recoverable/other-version databases. No weak fallback is available.
+
 ## Limits
 
-The vault is **not encrypted at rest**, anonymized, or a lossless backup. Names, messages and source labels may contain private information. Normalized/redacted text replaces raw content during import.
+The vault and generated plaintext mirrors are **not encrypted at rest**, anonymized, or a lossless backup. Names, messages and source labels may contain private information. Normalized/redacted text replaces raw content during import.
 
 Permissions and path checks do not defend against a compromised OS or a hostile process already controlling the same user account. Metadata checks detect ordinary changes; they are not a cryptographic authenticity proof or a complete defense against every filesystem race. Imported records do not establish current WeChat state.
 
